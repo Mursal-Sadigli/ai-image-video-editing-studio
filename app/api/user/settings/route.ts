@@ -20,12 +20,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      keys: {
-        falApiKey: userRecord.falApiKey || "",
-        replicateApiKey: userRecord.replicateApiKey || "",
-        openaiApiKey: userRecord.openaiApiKey || "",
-        googleApiKey: userRecord.googleApiKey || "",
-      }
+      keys: null // Artıq açarlar yoxdur
     });
   } catch (error) {
     console.error("[SETTINGS_GET]", error);
@@ -40,17 +35,9 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await req.json();
-    const { falApiKey, replicateApiKey, openaiApiKey, googleApiKey } = body;
-
-    await db.update(users)
-      .set({
-        falApiKey: falApiKey || null,
-        replicateApiKey: replicateApiKey || null,
-        openaiApiKey: openaiApiKey || null,
-        googleApiKey: googleApiKey || null,
-      })
-      .where(eq(users.clerkId, userId));
+    // Gələcək user tənzimləmələri buraya əlavə ediləcək
+    // Hələlik heç nə etmirik, çünki API açarları silindi
+    // const body = await req.json();
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -91,10 +91,6 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default("user"),
   creditsBalance: integer("credits_balance").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id").unique(),
-  falApiKey: text("fal_api_key"),
-  replicateApiKey: text("replicate_api_key"),
-  openaiApiKey: text("openai_api_key"),
-  googleApiKey: text("google_api_key"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
