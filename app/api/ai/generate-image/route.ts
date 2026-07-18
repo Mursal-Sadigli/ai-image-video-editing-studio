@@ -7,11 +7,13 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { getModelById } from "@/lib/ai/models";
 
 const requestSchema = z.object({
   prompt: z.string().min(3, "Prompt çox qısadır"),
   aspectRatio: z.string().optional().default("1:1"),
   style: z.string().optional(),
+  modelId: z.string().optional().default("fal-ai/flux/schnell"),
 });
 
 export async function POST(req: Request) {
@@ -45,8 +47,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 });
     }
 
-    const { prompt, aspectRatio, style } = result.data;
-    const creditsCost = 1; // 1 şəkil = 1 kredit
+    const { prompt, aspectRatio, style, modelId } = result.data;
+    
+    // Model məlumatlarını və real qiymətini (creditCost) alırıq
+    const selectedModel = getModelById(modelId);
+    if (!selectedModel) {
+      return NextResponse.json({ error: "Yanlış AI modeli seçilib" }, { status: 400 });
+    }
+
+    const creditsCost = selectedModel.creditsCost;
 
     // 1. Kredit balansını yoxla (DB User id ilə)
     const hasEnough = await hasEnoughCredits(internalUserId, creditsCost);
@@ -68,8 +77,8 @@ export async function POST(req: Request) {
       userId: internalUserId,
       type: "image_generation",
       prompt,
-      provider: "replicate",
-      modelName: "black-forest-labs/flux-schnell",
+      provider: selectedModel.provider,
+      modelName: selectedModel.id,
       parameters: { aspectRatio, style },
       creditsCost,
     });
@@ -82,6 +91,8 @@ export async function POST(req: Request) {
         userId: internalUserId,
         prompt: prompt,
         creditsCost: creditsCost,
+        modelId: selectedModel.id,
+        provider: selectedModel.provider,
       },
     });
 

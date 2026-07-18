@@ -10,12 +10,14 @@ import { ImageIcon, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
+import { AI_MODELS } from "@/lib/ai/models";
 
 export default function ImageGenerationPage() {
   const { isLoaded, userId } = useAuth();
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [style, setStyle] = useState("photorealistic");
+  const [modelId, setModelId] = useState(AI_MODELS[0].id);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generationId, setGenerationId] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export default function ImageGenerationPage() {
       const res = await fetch("/api/ai/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, aspectRatio, style }),
+        body: JSON.stringify({ prompt, aspectRatio, style, modelId }),
       });
 
       const data = await res.json();
@@ -103,6 +105,27 @@ export default function ImageGenerationPage() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Süni İntellekt Modeli</Label>
+                <Select value={modelId} onValueChange={setModelId}>
+                  <SelectTrigger className="h-auto">
+                    <SelectValue placeholder="Model seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AI_MODELS.map((model) => (
+                      <SelectItem key={model.id} value={model.id} className="py-2.5">
+                        <div className="flex flex-col text-left gap-0.5">
+                          <span className="font-medium text-sm">{model.name}</span>
+                          <span className="text-[10px] text-muted-foreground whitespace-normal leading-snug">
+                            {model.description} ({model.creditsCost} kredit)
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

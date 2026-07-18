@@ -94,6 +94,7 @@ export const users = pgTable("users", {
   falApiKey: text("fal_api_key"),
   replicateApiKey: text("replicate_api_key"),
   openaiApiKey: text("openai_api_key"),
+  googleApiKey: text("google_api_key"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
