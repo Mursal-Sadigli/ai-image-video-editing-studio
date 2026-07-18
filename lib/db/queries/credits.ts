@@ -30,28 +30,23 @@ export async function calculateCreditBalance(
 export async function addCreditTransaction(
   data: NewCreditTransaction
 ): Promise<CreditTransaction> {
-  // Tranzaksiya daxilində: ledger yazısı + balans yeniləmə
-  const result = await db.transaction(async (tx) => {
-    // 1. Ledger yazısı əlavə et
-    const [transaction] = await tx
-      .insert(creditTransactions)
-      .values(data)
-      .returning();
+  // 1. Ledger yazısı əlavə et
+  const [transaction] = await db
+    .insert(creditTransactions)
+    .values(data)
+    .returning();
 
-    // 2. users.credits_balance-ı yenilə (ledger-dən sync)
-    if (data.userId) {
-      await tx
-        .update(users)
-        .set({
-          creditsBalance: sql`${users.creditsBalance} + ${data.amount}`,
-        })
-        .where(eq(users.id, data.userId));
-    }
+  // 2. users.credits_balance-ı yenilə (ledger-dən sync)
+  if (data.userId) {
+    await db
+      .update(users)
+      .set({
+        creditsBalance: sql`${users.creditsBalance} + ${data.amount}`,
+      })
+      .where(eq(users.id, data.userId));
+  }
 
-    return transaction;
-  });
-
-  return result;
+  return transaction;
 }
 
 /**

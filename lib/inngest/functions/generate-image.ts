@@ -1,12 +1,7 @@
 import { inngest } from "../client";
-import Replicate from "replicate";
 import { updateGenerationStatus, getGenerationById } from "@/lib/db/queries/generations";
 import { addCreditTransaction } from "@/lib/db/queries/credits";
 import { createFile } from "@/lib/db/queries/files";
-
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
 
 export const generateImage = inngest.createFunction(
   { id: "generate-image", name: "Generate AI Image", triggers: [{ event: "ai/generate.image" }] },
@@ -19,35 +14,25 @@ export const generateImage = inngest.createFunction(
     });
 
     try {
-      // 2. Call Replicate API
-      const outputUrl = await step.run("call-replicate", async () => {
-        const output = await replicate.run(
-          "black-forest-labs/flux-schnell", // Fast and good model
-          {
-            input: {
-              prompt: prompt,
-              aspect_ratio: "1:1",
-              output_format: "png",
-              output_quality: 100,
-            }
-          }
-        );
+      // 2. Mock AI API (Test məqsədilə saxta generasiya)
+      const outputUrl = await step.run("mock-ai", async () => {
+        // AI generasiya vaxtını simulyasiya edirik (təxminən 3 saniyə)
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
-        // Flux returns an array of streams/urls. We grab the first one.
-        if (Array.isArray(output) && output.length > 0) {
-          return output[0] as string;
-        }
-        throw new Error("Invalid output from Replicate");
+        // Hər dəfə fərqli, amma yüksək keyfiyyətli fotorealistik bir Unsplash şəkli qaytarırıq
+        const randomId = Math.floor(Math.random() * 1000);
+        return `https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=1024&q=80&random=${randomId}`;
       });
 
       // 3. Save generated file to DB (Normally upload to ImageKit first, but we skip for MVP if ImageKit keys are missing)
       const fileId = await step.run("save-file-record", async () => {
         const newFile = await createFile({
           userId: userId,
-          name: `generation-${generationId}.png`,
+          imagekitFileId: `pollinations-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          fileName: `generation-${generationId}.png`,
           url: outputUrl,
           fileType: "image",
-          size: 0,
+          sizeBytes: 0,
         });
         return newFile.id;
       });

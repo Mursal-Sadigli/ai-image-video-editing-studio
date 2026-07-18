@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { inngest } from "@/lib/inngest/client";
 import { hasEnoughCredits, addCreditTransaction } from "@/lib/db/queries/credits";
 import { createGeneration } from "@/lib/db/queries/generations";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 const requestSchema = z.object({
@@ -13,10 +16,27 @@ const requestSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await currentUser();
+    if (!user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const clerkId = user.id;
+    const email = user.emailAddresses[0]?.emailAddress || "unknown@visionai.com";
+
+    // Mərhələ 4 üçün MVP Sync: Əgər user yoxdursa DB-yə əlavə edirik (Webhook qurulana qədər)
+    let dbUser = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1).then(r => r[0]);
+    if (!dbUser) {
+      const [newUser] = await db.insert(users).values({
+        clerkId,
+        email,
+        fullName: user.firstName ? `${user.firstName} ${user.lastName || ""}` : "User",
+        creditsBalance: 20, // Yeni userə 20 kredit
+      }).returning();
+      dbUser = newUser;
+    }
+
+    const internalUserId = dbUser.id; // UUID from database
 
     const body = await req.json();
     const result = requestSchema.safeParse(body);
@@ -28,16 +48,15 @@ export async function POST(req: Request) {
     const { prompt, aspectRatio, style } = result.data;
     const creditsCost = 1; // 1 şəkil = 1 kredit
 
-    // 1. Kredit balansını yoxla
-    const hasEnough = await hasEnoughCredits(userId, creditsCost);
+    // 1. Kredit balansını yoxla (DB User id ilə)
+    const hasEnough = await hasEnoughCredits(internalUserId, creditsCost);
     if (!hasEnough) {
       return NextResponse.json({ error: "Kifayət qədər kreditiniz yoxdur" }, { status: 402 });
     }
 
     // 2. Krediti dərhal çıx (spam-ın qarşısını almaq üçün)
-    // Əgər proses uğursuz olsa, Inngest refund edəcək.
     const transaction = await addCreditTransaction({
-      userId,
+      userId: internalUserId,
       amount: -creditsCost,
       balanceAfter: 0, // MVP üçün default
       type: "usage",
@@ -46,7 +65,7 @@ export async function POST(req: Request) {
 
     // 3. DB-də Generation (Queued) qeydi yarat
     const generation = await createGeneration({
-      userId,
+      userId: internalUserId,
       type: "image_generation",
       prompt,
       provider: "replicate",
@@ -60,7 +79,7 @@ export async function POST(req: Request) {
       name: "ai/generate.image",
       data: {
         generationId: generation.id,
-        userId: userId,
+        userId: internalUserId,
         prompt: prompt,
         creditsCost: creditsCost,
       },
@@ -73,6 +92,11 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("[GENERATE_IMAGE_ERROR]", error);
-    return new NextResponse("Daxili server xətası", { status: 500 });
+    require('fs').appendFileSync('error.log', new Date().toISOString() + ' ' + error.stack + '\n');
+    return NextResponse.json({ 
+      error: "Daxili server xətası", 
+      details: error.message,
+      stack: error.stack
+    }, { status: 500 });
   }
 }
