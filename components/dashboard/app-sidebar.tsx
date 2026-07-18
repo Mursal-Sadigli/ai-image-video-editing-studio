@@ -39,16 +39,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-lg">VisionAI</span>
-                  <span className="text-xs text-muted-foreground">Studio</span>
-                </div>
-              </Link>
+            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Sparkles className="size-4" />
+              </div>
+              <div className="flex flex-col gap-0.5 leading-none">
+                <span className="font-semibold text-lg">VisionAI</span>
+                <span className="text-xs text-muted-foreground">Studio</span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -59,27 +57,21 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
-                  <Link href="/dashboard">
-                    <LayoutDashboard />
-                    <span>Dashboard</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/dashboard" />} isActive={pathname === "/dashboard"}>
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/projects")}>
-                  <Link href="/projects">
-                    <FolderOpen />
-                    <span>Layihələr</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/projects" />} isActive={pathname.startsWith("/projects")}>
+                  <FolderOpen />
+                  <span>Layihələr</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/history")}>
-                  <Link href="/history">
-                    <History />
-                    <span>Tarixçə</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/history" />} isActive={pathname.startsWith("/history")}>
+                  <History />
+                  <span>Tarixçə</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -106,11 +98,9 @@ export function AppSidebar() {
                         const Icon = Icons[tool.icon] || Icons.Wand2;
                         return (
                           <SidebarMenuSubItem key={tool.id}>
-                            <SidebarMenuSubButton asChild isActive={pathname === `/studio/${tool.id}`}>
-                              <Link href={`/studio/${tool.id}`}>
-                                <Icon className="mr-2 size-4" />
-                                <span>{tool.name}</span>
-                              </Link>
+                            <SidebarMenuSubButton render={<Link href={`/studio/${tool.id}`} />} isActive={pathname === `/studio/${tool.id}`}>
+                              <Icon className="mr-2 size-4" />
+                              <span>{tool.name}</span>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         );
@@ -128,27 +118,21 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/team")}>
-                  <Link href="/team">
-                    <Users />
-                    <span>Komanda</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/team" />} isActive={pathname.startsWith("/team")}>
+                  <Users />
+                  <span>Komanda</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/billing")}>
-                  <Link href="/billing">
-                    <CreditCard />
-                    <span>Ödənişlər</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/billing" />} isActive={pathname.startsWith("/billing")}>
+                  <CreditCard />
+                  <span>Ödənişlər</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/settings")}>
-                  <Link href="/settings">
-                    <Settings />
-                    <span>Tənzimləmələr</span>
-                  </Link>
+                <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname.startsWith("/settings")}>
+                  <Settings />
+                  <span>Tənzimləmələr</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
