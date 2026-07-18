@@ -131,15 +131,24 @@
 
 @keyframes sparkle-spin {
   0%, 100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
+    color: #8b5cf6; /* purple */
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.6));
   }
-  50% {
-    transform: scale(1.2) rotate(15deg);
-    opacity: 0.8;
+  33% {
+    color: #ec4899; /* pink */
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.8));
+  }
+  66% {
+    color: #3b82f6; /* blue */
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
   }
 }
 
 @utility animate-sparkle {
   animation: sparkle-spin 2s ease-in-out infinite;
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+  will-change: transform, filter, color;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }

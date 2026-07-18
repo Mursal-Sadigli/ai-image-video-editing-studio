@@ -9,8 +9,8 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
           <div className="col-span-2 md:col-span-2 space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="bg-primary/10 p-1.5 rounded-lg group-hover:bg-primary/20 transition-colors">
-                <Sparkles className="h-5 w-5 text-primary animate-sparkle" />
+              <div className="bg-primary/10 p-1.5 rounded-lg group-hover:bg-primary/20 transition-colors flex items-center justify-center">
+                <Sparkles className="h-5 w-5 animate-sparkle" />
               </div>
               <h3 className="text-lg font-bold">VisionAI</h3>
             </div>

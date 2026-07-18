@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Wand2, Image as ImageIcon, Film, Eraser, ZoomIn } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ParticleWave } from "@/components/ui/particle-wave";
 import { useAuth } from "@clerk/nextjs";
 
 export default function LandingPage() {
@@ -30,8 +31,11 @@ export default function LandingPage() {
       <section className="relative w-full pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-background" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-500/20 blur-[120px] rounded-full pointer-events-none" />
+        <ParticleWave
+          className="absolute inset-0 z-0 opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 z-0 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-500/20 blur-[120px] rounded-full pointer-events-none z-0" />
 
         <div className="container relative z-10 px-4 md:px-6 flex flex-col items-center text-center space-y-8">
           <motion.div
@@ -40,7 +44,7 @@ export default function LandingPage() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center rounded-full border bg-background/50 backdrop-blur-sm px-3 py-1 text-sm font-medium mb-4"
           >
-            <Sparkles className="h-4 w-4 mr-2 text-indigo-500 animate-sparkle" />
+            <Sparkles className="h-4 w-4 mr-2 animate-sparkle" />
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
               Yeni: AI Video Generation artıq mövcuddur
             </span>

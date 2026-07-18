@@ -12,8 +12,8 @@ export async function Navbar() {
         {/* Sol Tərəf: Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="bg-primary/10 p-1.5 rounded-lg group-hover:bg-primary/20 transition-colors">
-              <Sparkles className="h-5 w-5 text-primary animate-sparkle" />
+            <div className="bg-primary/10 p-1.5 rounded-lg group-hover:bg-primary/20 transition-colors flex items-center justify-center">
+              <Sparkles className="h-5 w-5 animate-sparkle" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-500 bg-clip-text text-transparent dark:from-white dark:to-zinc-400">
               VisionAI
