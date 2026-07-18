@@ -41,7 +41,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Sparkles className="size-4" />
+                <Sparkles className="size-4 animate-sparkle" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-semibold text-lg">VisionAI</span>
@@ -84,12 +84,10 @@ export function AppSidebar() {
             <SidebarMenu>
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="AI Alətləri">
-                      <Wand2 />
-                      <span>Alətlər</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
+                  <CollapsibleTrigger render={<SidebarMenuButton tooltip="AI Alətləri" />}>
+                    <Wand2 />
+                    <span>Alətlər</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>

@@ -5,8 +5,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Wand2, Image as ImageIcon, Film, Eraser, ZoomIn } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from "@clerk/nextjs";
 
 export default function LandingPage() {
+  const { userId } = useAuth();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -69,10 +71,17 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 mt-8"
           >
-            <Link href="/sign-up" className={buttonVariants({ size: "lg", className: "text-md px-8 h-12 rounded-full group" })}>
-              Pulsuz başla
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+            {!userId ? (
+              <Link href="/sign-up" className={buttonVariants({ size: "lg", className: "text-md px-8 h-12 rounded-full group" })}>
+                Pulsuz başla
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            ) : (
+              <Link href="/dashboard" className={buttonVariants({ size: "lg", className: "text-md px-8 h-12 rounded-full group" })}>
+                Dashboard-a keç
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            )}
             <Dialog>
               <DialogTrigger className={buttonVariants({ variant: "outline", size: "lg", className: "text-md px-8 h-12 rounded-full bg-background/50 backdrop-blur-sm cursor-pointer" })}>
                 Demo-ya bax

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AI_TOOLS } from "@/config/ai-tools";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, CreditCard, ArrowRight, Activity } from "lucide-react";
+import { Plus, Sparkles, CreditCard, ArrowRight, Activity, Wand2, History } from "lucide-react";
 import * as Icons from "lucide-react";
 
 export default async function DashboardPage() {
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
           <CardContent className="p-6 flex flex-col justify-between h-full relative z-10">
             <div>
               <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-400" />
+                <Sparkles className="h-5 w-5 text-indigo-400 animate-sparkle" />
                 Pro-ya keç, Sərhədləri qır
               </h3>
               <p className="text-zinc-400 max-w-md">
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
             </div>
             <div className="mt-4">
               <Link href="/pricing">
-                <Button variant="outline" className="text-white border-zinc-700 hover:bg-zinc-800 hover:text-white">
+                <Button variant="outline" className="bg-transparent text-white border-zinc-700 hover:bg-zinc-800 hover:text-white">
                   Planlara bax
                 </Button>
               </Link>

@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
-export function Navbar() {
+export async function Navbar() {
+  const { userId } = await auth();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between w-full relative">
@@ -40,12 +43,23 @@ export function Navbar() {
           </Link>
         </nav>
         <div className="flex items-center gap-6">
-          <Link href="/sign-in" className="text-sm font-medium hidden md:block hover:text-primary transition-colors">
-            Giriş
-          </Link>
-          <Link href="/sign-up" className={buttonVariants({ variant: "default" })}>
-            Pulsuz başla
-          </Link>
+          {!userId ? (
+            <>
+              <Link href="/sign-in" className="text-sm font-medium hidden md:block hover:text-primary transition-colors">
+                Giriş
+              </Link>
+              <Link href="/sign-up" className={buttonVariants({ variant: "default" })}>
+                Pulsuz başla
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
+                Dashboard
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </>
+          )}
         </div>
       </div>
     </header>

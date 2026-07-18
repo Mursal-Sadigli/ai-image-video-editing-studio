@@ -1,11 +1,27 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { currentUser } from "@clerk/nextjs/server";
+import { syncNewUser } from "@/lib/clerk/sync-user";
+import { redirect } from "next/navigation";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await currentUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  // Qeydiyyatdan keçən istifadəçinin DB-də mütləq mövcud olmasını təmin edir (Webhook gecikmələrinə və ya local dev mühitinə qarşı)
+  await syncNewUser({
+    clerkId: user.id,
+    email: user.emailAddresses[0]?.emailAddress || "",
+    fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || null,
+    avatarUrl: user.imageUrl || null,
+  });
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-zinc-50 dark:bg-zinc-950">
