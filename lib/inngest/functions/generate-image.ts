@@ -5,12 +5,11 @@ import { addCreditTransaction } from "@/lib/db/queries/credits";
 import { createFile } from "@/lib/db/queries/files";
 
 const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN || "mock-token",
+  auth: process.env.REPLICATE_API_TOKEN,
 });
 
 export const generateImage = inngest.createFunction(
-  { id: "generate-image", name: "Generate AI Image" },
-  { event: "ai/generate.image" },
+  { id: "generate-image", name: "Generate AI Image", triggers: [{ event: "ai/generate.image" }] },
   async ({ event, step }) => {
     const { generationId, userId, prompt, creditsCost } = event.data;
 
@@ -22,12 +21,6 @@ export const generateImage = inngest.createFunction(
     try {
       // 2. Call Replicate API
       const outputUrl = await step.run("call-replicate", async () => {
-        if (!process.env.REPLICATE_API_TOKEN) {
-          // Mock delay for local testing without API key
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-          return "https://replicate.delivery/pbxt/mock-image-url/out-0.png"; // Mock image
-        }
-
         const output = await replicate.run(
           "black-forest-labs/flux-schnell", // Fast and good model
           {
@@ -81,6 +74,7 @@ export const generateImage = inngest.createFunction(
         await addCreditTransaction({
           userId: userId,
           amount: creditsCost,
+          balanceAfter: 0, // In MVP we handle this loosely outside the transaction
           type: "refund",
           description: "Şəkil generasiyası uğursuz oldu (Refund)",
           generationId: generationId,

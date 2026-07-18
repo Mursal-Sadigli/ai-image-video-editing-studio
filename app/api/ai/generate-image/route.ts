@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const result = requestSchema.safeParse(body);
     
     if (!result.success) {
-      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
+      return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 });
     }
 
     const { prompt, aspectRatio, style } = result.data;
@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     const transaction = await addCreditTransaction({
       userId,
       amount: -creditsCost,
+      balanceAfter: 0, // MVP üçün default
       type: "usage",
       description: "AI Şəkil Generasiyası",
     });
