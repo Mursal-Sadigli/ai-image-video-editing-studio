@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,8 +54,12 @@ export function CreateProjectDialog({ children }: { children?: React.ReactNode }
       router.refresh();
       // Yaranan layihənin səhifəsinə yönləndir
       router.push(`/projects/${data.project.id}`);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Xəta baş verdi");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -64,14 +67,14 @@ export function CreateProjectDialog({ children }: { children?: React.ReactNode }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <div onClick={() => setOpen(true)} className="inline-block cursor-pointer">
         {children || (
-          <Button>
+          <Button type="button">
             <Plus className="mr-2 h-4 w-4" />
             Layihə yarat
           </Button>
         )}
-      </DialogTrigger>
+      </div>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -85,7 +88,7 @@ export function CreateProjectDialog({ children }: { children?: React.ReactNode }
               <Label htmlFor="name">Layihənin adı</Label>
               <Input
                 id="name"
-                placeholder="Məs: Yay Kampaniyası 2026"
+                placeholder="Yeni Layihə adı..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}

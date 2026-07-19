@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ files: filesList });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET /api/files error:", error);
     return NextResponse.json({ error: "Daxili server xətası" }, { status: 500 });
   }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ file: newFile }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST /api/files error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 });

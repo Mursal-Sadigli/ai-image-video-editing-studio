@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "İcazəsiz giriş" }, { status: 401 });
@@ -13,7 +13,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
     if (!userDb.length) return NextResponse.json({ error: "İstifadəçi tapılmadı" }, { status: 404 });
 
-    const fileId = params.id;
+    const { id } = await params;
+    const fileId = id;
     const file = await getFileById(fileId, userDb[0].id);
     
     if (!file) {
@@ -29,7 +30,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     return NextResponse.json({ success: true, message: "Fayl silindi" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE /api/files/[id] error:", error);
     return NextResponse.json({ error: "Daxili server xətası" }, { status: 500 });
   }

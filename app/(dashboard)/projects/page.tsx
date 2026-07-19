@@ -1,5 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { getUserProjects } from "@/lib/db/queries/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -16,8 +19,13 @@ export default async function ProjectsPage() {
     redirect("/sign-in");
   }
 
-  // Fetch projects from DB
-  const projectsList = await getUserProjects(user.id);
+  const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
+  if (!userDb.length) {
+    redirect("/sign-in");
+  }
+
+  // Fetch projects from DB using internal UUID
+  const projectsList = await getUserProjects(userDb[0].id);
 
   return (
     <div className="space-y-8">

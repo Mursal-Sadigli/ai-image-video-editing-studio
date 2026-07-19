@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const projectsList = await getUserProjects(userDb[0].id);
     return NextResponse.json({ projects: projectsList });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET /api/projects error:", error);
     return NextResponse.json({ error: "Daxili server xətası" }, { status: 500 });
   }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ project: newProject }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST /api/projects error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 });

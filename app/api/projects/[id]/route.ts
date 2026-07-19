@@ -12,7 +12,7 @@ const updateProjectSchema = z.object({
   isArchived: z.boolean().optional(),
 });
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "İcazəsiz giriş" }, { status: 401 });
@@ -20,7 +20,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
     if (!userDb.length) return NextResponse.json({ error: "İstifadəçi tapılmadı" }, { status: 404 });
 
-    const projectId = params.id;
+    const { id } = await params;
+    const projectId = id;
     const project = await getProjectById(projectId, userDb[0].id);
     
     if (!project) {
@@ -30,13 +31,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const generations = await getProjectGenerations(projectId, userDb[0].id);
 
     return NextResponse.json({ project, generations });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET /api/projects/[id] error:", error);
     return NextResponse.json({ error: "Daxili server xətası" }, { status: 500 });
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "İcazəsiz giriş" }, { status: 401 });
@@ -44,7 +45,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
     if (!userDb.length) return NextResponse.json({ error: "İstifadəçi tapılmadı" }, { status: 404 });
 
-    const projectId = params.id;
+    const { id } = await params;
+    const projectId = id;
     const body = await req.json();
     const validatedData = updateProjectSchema.parse(body);
 
@@ -55,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     return NextResponse.json({ project: updatedProject });
-  } catch (error: any) {
+  } catch (error) {
     console.error("PATCH /api/projects/[id] error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
@@ -64,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "İcazəsiz giriş" }, { status: 401 });
@@ -72,7 +74,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
     if (!userDb.length) return NextResponse.json({ error: "İstifadəçi tapılmadı" }, { status: 404 });
 
-    const projectId = params.id;
+    const { id } = await params;
+    const projectId = id;
     const deletedProject = await deleteProject(projectId, userDb[0].id);
     
     if (!deletedProject) {
@@ -80,7 +83,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     return NextResponse.json({ success: true, message: "Layihə silindi" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE /api/projects/[id] error:", error);
     return NextResponse.json({ error: "Daxili server xətası" }, { status: 500 });
   }

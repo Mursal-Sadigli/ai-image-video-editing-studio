@@ -10,20 +10,21 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { az } from "date-fns/locale";
 
-export default async function ProjectDetailsPage({ params }: { params: { projectId: string } }) {
+export default async function ProjectDetailsPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
   const userDb = await db.select().from(users).where(eq(users.clerkId, user.id)).limit(1);
   if (!userDb.length) redirect("/sign-in");
 
-  const project = await getProjectById(params.projectId, userDb[0].id);
+  const project = await getProjectById(projectId, userDb[0].id);
   
   if (!project) {
     redirect("/projects"); // Yaxud xəta səhifəsinə yönləndir
   }
 
-  const generations = await getProjectGenerations(params.projectId, userDb[0].id);
+  const generations = await getProjectGenerations(projectId, userDb[0].id);
 
   return (
     <div className="space-y-8">

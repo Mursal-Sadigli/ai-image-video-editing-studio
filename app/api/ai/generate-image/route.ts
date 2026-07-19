@@ -101,13 +101,15 @@ export async function POST(req: Request) {
       generationId: generation.id 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[GENERATE_IMAGE_ERROR]", error);
-    require('fs').appendFileSync('error.log', new Date().toISOString() + ' ' + error.stack + '\n');
+    let errorMessage = "Daxili server xətası";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     return NextResponse.json({ 
       error: "Daxili server xətası", 
-      details: error.message,
-      stack: error.stack
+      details: errorMessage,
     }, { status: 500 });
   }
 }

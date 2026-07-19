@@ -1,10 +1,7 @@
 import { inngest } from "../client";
-import { updateGenerationStatus, getGenerationById } from "@/lib/db/queries/generations";
+import { updateGenerationStatus } from "@/lib/db/queries/generations";
 import { addCreditTransaction } from "@/lib/db/queries/credits";
 import { createFile } from "@/lib/db/queries/files";
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export const generateImage = inngest.createFunction(
   { id: "generate-image", name: "Generate AI Image", triggers: [{ event: "ai/generate.image" }] },
@@ -17,51 +14,57 @@ export const generateImage = inngest.createFunction(
     });
 
     try {
-      // 3. Router: Provayderə uyğun modeli çağır
+      // 2. Router: Provayderə uyğun modeli çağır
       const aiResult = await step.run("call-ai-model", async () => {
         try {
-          if (provider === "other") {
-            // Pollinations AI tamamilə pulsuzdur, limitsizdir və heç bir API açarı tələb etmir
-            const safePrompt = encodeURIComponent(prompt);
-            const randomSeed = Math.floor(Math.random() * 1000000);
-            const pollinationsUrl = `https://image.pollinations.ai/prompt/${safePrompt}?seed=${randomSeed}&width=1024&height=1024&nologo=true&model=flux`;
-            
-            // Frontend-də xəta çıxmaması üçün şəkli backend-də gözləyib base64 formatına çeviririk
-            const response = await fetch(pollinationsUrl, {
-              headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "image/jpeg,image/png,*/*"
+          if (modelId === "huggingface-flux" || provider === "other") {
+            const hfKey = process.env.HUGGINGFACE_API_KEY;
+            if (!hfKey) throw new Error("Hugging Face API açarı tapılmadı.");
+
+            const response = await fetch(
+              "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${hfKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ inputs: prompt }),
               }
-            });
+            );
+
             if (!response.ok) {
               const errText = await response.text();
-              throw new Error(`Pollinations Error (${response.status}): ${errText.substring(0, 100)}`);
+              throw new Error(`Hugging Face Error (${response.status}): ${errText.substring(0, 150)}`);
             }
-            
+
             const arrayBuffer = await response.arrayBuffer();
-            const base64Image = Buffer.from(arrayBuffer).toString('base64');
-            
+            const base64Image = Buffer.from(arrayBuffer).toString("base64");
+
             return { url: `data:image/jpeg;base64,${base64Image}` };
           }
 
           throw new Error(`Bilinməyən provayder: ${provider}`);
-        } catch (e: any) {
-          return { error: e.message };
+        } catch (e: unknown) {
+          if (e instanceof Error) {
+            return { error: e.message };
+          }
+          return { error: "Bilinməyən xəta" };
         }
       });
 
       if (aiResult.error) {
         throw new Error(aiResult.error);
       }
-      
+
       const outputUrl = aiResult.url!;
 
-      // 3. Save generated file to DB (Normally upload to ImageKit first, but we skip for MVP if ImageKit keys are missing)
+      // 3. Save generated file to DB (Normally upload to ImageKit first, but we skip for MVP)
       const fileId = await step.run("save-file-record", async () => {
         const newFile = await createFile({
           userId: userId,
-          imagekitFileId: `pollinations-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          fileName: `generation-${generationId}.png`,
+          imagekitFileId: `hf-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          fileName: `generation-${generationId}.jpeg`,
           url: outputUrl,
           fileType: "image",
           sizeBytes: 0,
@@ -78,27 +81,31 @@ export const generateImage = inngest.createFunction(
       });
 
       return { success: true, url: outputUrl };
-
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 5. Handle failure: update status and refund credit
       await step.run("handle-failure", async () => {
+        let errorMessage = "Bilinməyən xəta baş verdi";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
         await updateGenerationStatus(generationId, {
           status: "failed",
-          error: error.message || "Bilinməyən xəta baş verdi",
+          error: errorMessage,
         });
 
         // Refund credit
         await addCreditTransaction({
           userId: userId,
           amount: creditsCost,
-          balanceAfter: 0, // In MVP we handle this loosely outside the transaction
+          balanceAfter: 0,
           type: "refund",
           description: "Şəkil generasiyası uğursuz oldu (Refund)",
           generationId: generationId,
         });
       });
 
-      throw error; // Let Inngest know it failed
+      throw error; // Re-throw so Inngest knows the step failed overall
     }
   }
 );
