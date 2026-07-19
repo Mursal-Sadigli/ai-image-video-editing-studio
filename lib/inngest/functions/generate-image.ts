@@ -17,73 +17,33 @@ export const generateImage = inngest.createFunction(
     });
 
     try {
-      // 2. BYOK: Get user's Keys
-      const userRecord = await step.run("get-user-keys", async () => {
-        const result = await db.query.users.findFirst({
-          where: eq(users.id, userId),
-        });
-        if (!result) throw new Error("User not found");
-        return result;
-      });
-
       // 3. Router: Provayderə uyğun modeli çağır
       const aiResult = await step.run("call-ai-model", async () => {
         try {
-          if (provider === "fal") {
-            if (!userRecord.falApiKey) throw new Error("BYOK: Şəkil yaratmaq üçün zəhmət olmasa Settings bölməsindən Fal.ai API açarınızı daxil edin.");
+          if (provider === "google") {
+            const apiKey = process.env.GOOGLE_API_KEY;
+            if (!apiKey) throw new Error("Server xətası: Google API açarı tapılmadı (.env.local)");
             
-            const response = await fetch(`https://fal.run/${modelId}`, {
+            // Imagen 3 üçün Gemini API (AI Studio) bağlantısı
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`, {
               method: "POST",
-              headers: {
-                "Authorization": `Key ${userRecord.falApiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ prompt, image_size: "square_hd" })
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                instances: [{ prompt: prompt }],
+                parameters: { sampleCount: 1 }
+              })
             });
 
             if (!response.ok) {
               const errorData = await response.text();
-              throw new Error(`Fal.ai Error: ${response.status} ${errorData}`);
+              throw new Error(`Google Gemini Error: ${response.status} ${errorData}`);
             }
             const data = await response.json();
-            if (data.images && data.images.length > 0) return { url: data.images[0].url as string };
-            throw new Error("Invalid output from Fal.ai");
-
-          } else if (provider === "openai") {
-            if (!userRecord.openaiApiKey) throw new Error("BYOK: Zəhmət olmasa Settings bölməsindən OpenAI API açarınızı daxil edin.");
-            
-            const response = await fetch("https://api.openai.com/v1/images/generations", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${userRecord.openaiApiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ model: "dall-e-3", prompt, size: "1024x1024", n: 1 })
-            });
-
-            if (!response.ok) {
-              const errorData = await response.text();
-              throw new Error(`OpenAI Error: ${response.status} ${errorData}`);
+            if (data.predictions && data.predictions.length > 0) {
+              const base64Image = data.predictions[0].bytesBase64Encoded;
+              return { url: `data:image/jpeg;base64,${base64Image}` };
             }
-            const data = await response.json();
-            if (data.data && data.data.length > 0) return { url: data.data[0].url as string };
-            throw new Error("Invalid output from OpenAI");
-
-          } else if (provider === "google") {
-            if (!userRecord.googleApiKey) throw new Error("BYOK: Zəhmət olmasa Settings bölməsindən Google Gemini API açarınızı daxil edin.");
-            
-            if (modelId === "veo-3") {
-               throw new Error("Google Veo modeli hazırda ancaq video generasiyası üçün əlçatandır və ya bağlı beta-dadır. Lütfən başqa model seçin.");
-            }
-
-            // Google AI Studio Imagen 3 public API endpoint is currently restricted/not fully available in v1beta predict.
-            // As a fallback for MVP testing, we use Pollinations AI to simulate the generated image.
-            const safePrompt = encodeURIComponent(prompt);
-            const mockUrl = `https://image.pollinations.ai/prompt/${safePrompt}?seed=${Date.now()}&width=1024&height=1024&nologo=true`;
-            
-            // Sadəcə gecikmə simulyasiyası (2 saniyə)
-            await new Promise(r => setTimeout(r, 2000));
-            return { url: mockUrl };
+            throw new Error("Invalid output from Google Gemini");
           }
 
           throw new Error(`Bilinməyən provayder: ${provider}`);

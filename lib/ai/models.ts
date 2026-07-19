@@ -10,7 +10,14 @@ export interface AIModel {
 }
 
 export const AI_MODELS: AIModel[] = [
-  // Yeni, pulsuz və mükəmməl modellər buraya əlavə olunacaq
+  {
+    id: "imagen-3",
+    name: "Google Gemini (Imagen 3)",
+    provider: "google",
+    description: "Google-un ən qabaqcıl vizual modeli.",
+    category: "google",
+    creditsCost: 8,
+  }
 ];
 
 export const getModelById = (modelId: string): AIModel | undefined => {
