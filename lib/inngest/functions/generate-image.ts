@@ -20,30 +20,28 @@ export const generateImage = inngest.createFunction(
       // 3. Router: Provayderə uyğun modeli çağır
       const aiResult = await step.run("call-ai-model", async () => {
         try {
-          if (provider === "google") {
-            const apiKey = process.env.GOOGLE_API_KEY;
-            if (!apiKey) throw new Error("Server xətası: Google API açarı tapılmadı (.env.local)");
+          if (provider === "other") {
+            // Pollinations AI tamamilə pulsuzdur, limitsizdir və heç bir API açarı tələb etmir
+            const safePrompt = encodeURIComponent(prompt);
+            const randomSeed = Math.floor(Math.random() * 1000000);
+            const pollinationsUrl = `https://image.pollinations.ai/prompt/${safePrompt}?seed=${randomSeed}&width=1024&height=1024&nologo=true&model=flux`;
             
-            // Imagen 3 üçün Gemini API (AI Studio) bağlantısı
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                instances: [{ prompt: prompt }],
-                parameters: { sampleCount: 1 }
-              })
+            // Frontend-də xəta çıxmaması üçün şəkli backend-də gözləyib base64 formatına çeviririk
+            const response = await fetch(pollinationsUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "image/jpeg,image/png,*/*"
+              }
             });
-
             if (!response.ok) {
-              const errorData = await response.text();
-              throw new Error(`Google Gemini Error: ${response.status} ${errorData}`);
+              const errText = await response.text();
+              throw new Error(`Pollinations Error (${response.status}): ${errText.substring(0, 100)}`);
             }
-            const data = await response.json();
-            if (data.predictions && data.predictions.length > 0) {
-              const base64Image = data.predictions[0].bytesBase64Encoded;
-              return { url: `data:image/jpeg;base64,${base64Image}` };
-            }
-            throw new Error("Invalid output from Google Gemini");
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const base64Image = Buffer.from(arrayBuffer).toString('base64');
+            
+            return { url: `data:image/jpeg;base64,${base64Image}` };
           }
 
           throw new Error(`Bilinməyən provayder: ${provider}`);

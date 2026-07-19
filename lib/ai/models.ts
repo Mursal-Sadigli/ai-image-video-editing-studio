@@ -11,12 +11,12 @@ export interface AIModel {
 
 export const AI_MODELS: AIModel[] = [
   {
-    id: "imagen-3",
-    name: "Google Gemini (Imagen 3)",
-    provider: "google",
-    description: "Google-un ən qabaqcıl vizual modeli.",
-    category: "google",
-    creditsCost: 8,
+    id: "huggingface-flux",
+    name: "Hugging Face (FLUX.1 Schnell)",
+    provider: "other",
+    description: "Hugging Face tərəfindən pulsuz və sürətli FLUX modeli.",
+    category: "flux",
+    creditsCost: 0,
   }
 ];
 

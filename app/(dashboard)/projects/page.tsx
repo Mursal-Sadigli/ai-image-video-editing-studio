@@ -7,6 +7,7 @@ import { Plus, FolderOpen, MoreVertical, Calendar } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { az } from "date-fns/locale";
+import { CreateProjectDialog } from "@/components/dashboard/create-project-dialog";
 
 export default async function ProjectsPage() {
   const user = await currentUser();
@@ -27,10 +28,12 @@ export default async function ProjectsPage() {
           <p className="text-muted-foreground mt-1">Bütün işlərinizi bir yerdə idarə edin.</p>
         </div>
         <div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Yeni Layihə
-          </Button>
+          <CreateProjectDialog>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Layihə
+            </Button>
+          </CreateProjectDialog>
         </div>
       </div>
 
@@ -44,10 +47,12 @@ export default async function ProjectsPage() {
             <p className="max-w-sm mx-auto mb-6">
               İlk layihənizi yaradaraq generasiyalarınızı qruplaşdırmağa başlayın.
             </p>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Layihə yarat
-            </Button>
+            <CreateProjectDialog>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Layihə yarat
+              </Button>
+            </CreateProjectDialog>
           </CardContent>
         </Card>
       ) : (
