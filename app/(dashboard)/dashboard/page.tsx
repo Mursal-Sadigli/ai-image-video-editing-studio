@@ -29,10 +29,10 @@ export default async function DashboardPage() {
           <Link href="/projects">
             <Button variant="outline">Layihələrə bax</Button>
           </Link>
-          <Link href="/studio/image-generation">
+          <Link href="/studio">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Yeni Generasiya
+              Studiyaya Keç
             </Button>
           </Link>
         </div>

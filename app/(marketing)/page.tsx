@@ -121,7 +121,6 @@ export default function LandingPage() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
           >
             {[
-              { title: "Image Generation", desc: "Mətndən fotorealistik şəkillər", icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-500/10" },
               { title: "Video Generation", desc: "Mətn və ya şəkildən videolar", icon: Film, color: "text-purple-500", bg: "bg-purple-500/10" },
               { title: "Background Removal", desc: "Bir klikdə arxa fonu silin", icon: Eraser, color: "text-pink-500", bg: "bg-pink-500/10" },
               { title: "Image-to-Image", desc: "Mövcud şəkli transformasiya edin", icon: Wand2, color: "text-orange-500", bg: "bg-orange-500/10" },

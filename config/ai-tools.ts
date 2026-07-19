@@ -6,20 +6,6 @@ import type { AIToolConfig } from "@/types/ai";
 
 export const AI_TOOLS: AIToolConfig[] = [
   {
-    id: "image-generation",
-    type: "image_generation",
-    name: "Image Generation",
-    description:
-      "Mətn promptundan fotorealistik şəkillər yaradın. Real fotodan fərqlənməyən nəticə.",
-    icon: "ImagePlus",
-    href: "/studio/image-generation",
-    creditCost: 2,
-    category: "image",
-    acceptsInput: false,
-    isAvailable: true,
-    demoImage: "/images/image-generation.png",
-  },
-  {
     id: "image-to-image",
     type: "image_to_image",
     name: "Image-to-Image",
