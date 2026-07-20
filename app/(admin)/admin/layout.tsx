@@ -21,8 +21,8 @@ export default async function AdminLayout({
     where: eq(users.clerkId, clerkId),
   });
 
-  if (!dbUser || dbUser.role !== "admin") {
-    // Əgər admin deyilsə, normal dashboard-a yönləndir
+  if (!dbUser || (dbUser.role !== "admin" && dbUser.role !== "owner")) {
+    // Əgər admin və ya owner deyilsə, normal dashboard-a yönləndir
     redirect("/dashboard");
   }
 

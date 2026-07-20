@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       where: eq(users.clerkId, clerkId),
     });
 
-    if (!dbAdmin || dbAdmin.role !== "admin") {
+    if (!dbAdmin || (dbAdmin.role !== "admin" && dbAdmin.role !== "owner")) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 

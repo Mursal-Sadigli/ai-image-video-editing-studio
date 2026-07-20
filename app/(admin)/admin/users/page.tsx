@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                    <Badge variant={user.role === "admin" || user.role === "owner" ? "default" : "secondary"}>
                       {user.role}
                     </Badge>
                   </TableCell>

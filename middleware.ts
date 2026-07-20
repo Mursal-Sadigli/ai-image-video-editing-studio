@@ -22,11 +22,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
 ]);
 
-// =========================================================
-// Admin route-lar (yalnız admin rolu)
-// =========================================================
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   // İctimai route-ları burax
@@ -37,15 +33,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Qorunan route-lar — auth tələb et
   const session = await auth.protect();
 
-  // Admin route-ları üçün rol yoxlaması
-  if (isAdminRoute(req)) {
-    // Clerk session metadata-dan rol yoxlaması
-    // Bu, Clerk dashboard-dan custom claim kimi qurulmalıdır
-    const role = session.sessionClaims?.metadata?.role;
-    if (role !== "admin") {
-      return Response.redirect(new URL("/dashboard", req.url));
-    }
-  }
+
 });
 
 export const config = {
