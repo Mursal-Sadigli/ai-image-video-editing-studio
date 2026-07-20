@@ -6,19 +6,19 @@ import { Star } from "lucide-react";
 export function TestimonialsSection() {
   const testimonials = [
     {
-      name: "Aygün Rəhimova",
+      name: "Tacir Hüseynov",
       role: "E-commerce Sahibi",
       content: "Məhsul şəkillərimizin arxa fonunu dəyişmək və keyfiyyətini artırmaq üçün artıq fotoqrafa müraciət etmirik. VisionAI ilə saniyələr içində studiya keyfiyyəti alırıq.",
       rating: 5,
     },
     {
-      name: "Elvin Məmmədov",
+      name: "Ramil Rəhimov",
       role: "Video Redaktor",
       content: "Video generation xüsusiyyəti həqiqətən inqilabi bir yenilikdir. Layihələrimdə b roll (arxa plan) videoları üçün artıq stok saytlarına pul ödəmirəm.",
       rating: 5,
     },
     {
-      name: "Səbinə Əliyeva",
+      name: "Nuray Məmmədova",
       role: "Sosial Media Meneceri",
       content: "Gündəlik postlar üçün kreativ şəkillər yaratmaq heç vaxt bu qədər asan olmamışdı. Hər bir detal o qədər reallaşır ki, izləyicilər AI olduğuna inanmır.",
       rating: 5,

@@ -19,31 +19,39 @@ export function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="font-medium mb-4">Məhsul</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/features" className="hover:text-primary">Xüsusiyyətlər</Link></li>
-              <li><Link href="/pricing" className="hover:text-primary">Qiymətlər</Link></li>
-              <li><Link href="/use-cases" className="hover:text-primary">İstifadə Halları</Link></li>
+            <h4 className="font-semibold mb-4">Xüsusiyyətlər</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><Link href="/features/image-generation" className="hover:text-primary transition-colors">Şəkil Generasiyası</Link></li>
+              <li><Link href="/features/video-generation" className="hover:text-primary transition-colors">Video Generasiyası</Link></li>
+              <li><Link href="/features/background-removal" className="hover:text-primary transition-colors">Arxa Fon Silinməsi</Link></li>
+              <li><Link href="/features/upscaler" className="hover:text-primary transition-colors">Keyfiyyətin Artırılması</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-medium mb-4">Resurslar</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/blog" className="hover:text-primary">Bloq</Link></li>
-              <li><Link href="/changelog" className="hover:text-primary">Yeniliklər</Link></li>
-              <li><Link href="/contact" className="hover:text-primary">Əlaqə</Link></li>
+            <h4 className="font-semibold mb-4">Şirkət</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><Link href="/pricing" className="hover:text-primary transition-colors">Qiymətlər</Link></li>
+              <li><Link href="/blog" className="hover:text-primary transition-colors">Bloq</Link></li>
+              <li><Link href="/about" className="hover:text-primary transition-colors">Haqqımızda</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Əlaqə</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-medium mb-4">Hüquqi</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/legal/terms" className="hover:text-primary">Şərtlər</Link></li>
-              <li><Link href="/legal/privacy" className="hover:text-primary">Məxfilik</Link></li>
+            <h4 className="font-semibold mb-4">Hüquqi</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><Link href="/legal/terms" className="hover:text-primary transition-colors">İstifadə Şərtləri</Link></li>
+              <li><Link href="/legal/privacy" className="hover:text-primary transition-colors">Məxfilik Siyasəti</Link></li>
             </ul>
           </div>
         </div>
-        <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} VisionAI Studio. Bütün hüquqlar qorunur.
+        
+        <div className="mt-12 pt-8 border-t flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} VisionAI. Bütün hüquqlar qorunur.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
+            <Link href="#" className="hover:text-primary transition-colors">Instagram</Link>
+            <Link href="#" className="hover:text-primary transition-colors">GitHub</Link>
+          </div>
         </div>
       </div>
     </footer>
