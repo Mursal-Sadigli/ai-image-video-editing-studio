@@ -1,4 +1,4 @@
-import { NextResponse } from "next/navigation";
+import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { teamMembers, users } from "@/lib/db/schema";
@@ -12,6 +12,11 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const dbUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1).then(res => res[0]);
+    if (!dbUser) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const { searchParams } = new URL(req.url);
     const teamId = searchParams.get("teamId");
 
@@ -21,7 +26,7 @@ export async function GET(req: Request) {
 
     // İcazəni yoxla (İstifadəçi bu komandanın üzvüdürmü?)
     const membership = await db.query.teamMembers.findFirst({
-      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
+      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, dbUser.id)),
     });
 
     if (!membership) {
@@ -70,12 +75,17 @@ export async function PATCH(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const dbUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1).then(res => res[0]);
+    if (!dbUser) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const body = await req.json();
     const { teamId, memberUserId, newRole } = updateRoleSchema.parse(body);
 
     // Yalnız owner və ya admin rolu dəyişə bilər
     const currentMembership = await db.query.teamMembers.findFirst({
-      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
+      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, dbUser.id)),
     });
 
     if (!currentMembership || (currentMembership.role !== "owner" && currentMembership.role !== "admin")) {
@@ -105,17 +115,22 @@ export async function DELETE(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const dbUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1).then(res => res[0]);
+    if (!dbUser) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const body = await req.json();
     const { teamId, memberUserId } = deleteMemberSchema.parse(body);
 
     const currentMembership = await db.query.teamMembers.findFirst({
-      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
+      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, dbUser.id)),
     });
 
     // Yalnız owner/admin silə bilər, və ya istifadəçi özü çıxa bilər
     if (
       !currentMembership ||
-      (currentMembership.role !== "owner" && currentMembership.role !== "admin" && userId !== memberUserId)
+      (currentMembership.role !== "owner" && currentMembership.role !== "admin" && dbUser.id !== memberUserId)
     ) {
       return new NextResponse("Forbidden", { status: 403 });
     }

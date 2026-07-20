@@ -250,12 +250,12 @@ export default function TeamPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger render={
                         <Button variant="ghost" className="h-8 w-8 p-0" disabled={member.role === "owner"}>
                           <span className="sr-only">Menyunu aç</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
-                      </DropdownMenuTrigger>
+                      } />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem 
                           className="text-destructive focus:bg-destructive/10 focus:text-destructive"

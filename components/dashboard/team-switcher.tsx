@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
@@ -56,69 +57,75 @@ export function TeamSwitcher() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Users className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {activeTeam ? activeTeam.name : "Şəxsi Hesab"}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {activeTeam ? "Komanda Mühiti" : "Fərdi Mühit"}
-                </span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger 
+            render={
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Users className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                  <span className="truncate font-semibold">
+                    {activeTeam ? activeTeam.name : "Şəxsi Hesab"}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {activeTeam ? "Komanda Mühiti" : "Fərdi Mühit"}
+                  </span>
+                </div>
+                <ChevronsUpDown className="ml-auto size-4" />
+              </SidebarMenuButton>
+            }
+          />
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Mühitlər
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => setActiveTeamId(null)}
-              className="gap-2 p-2"
-            >
-              <div className="flex size-6 items-center justify-center rounded-sm border">
-                <Users className="size-4 shrink-0" />
-              </div>
-              Şəxsi Hesab
-              {activeTeamId === null && (
-                <DropdownMenuShortcut>✓</DropdownMenuShortcut>
-              )}
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Mühitlər
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => setActiveTeamId(null)}
+                className="gap-2 p-2"
+              >
+                <div className="flex size-6 items-center justify-center rounded-sm border">
+                  <Users className="size-4 shrink-0" />
+                </div>
+                Şəxsi Hesab
+                {activeTeamId === null && (
+                  <DropdownMenuShortcut>✓</DropdownMenuShortcut>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             
             {teams && teams.length > 0 && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  Komandalar
-                </DropdownMenuLabel>
-                {teams.map((team: any) => (
-                  <DropdownMenuItem
-                    key={team.id}
-                    onClick={() => setActiveTeamId(team.id)}
-                    className="gap-2 p-2"
-                  >
-                    <div className="flex size-6 items-center justify-center rounded-sm border">
-                      {/* Placeholder for team logo or initial */}
-                      <span className="text-xs font-bold uppercase">{team.name.charAt(0)}</span>
-                    </div>
-                    {team.name}
-                    {activeTeamId === team.id && (
-                      <DropdownMenuShortcut>✓</DropdownMenuShortcut>
-                    )}
-                  </DropdownMenuItem>
-                ))}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    Komandalar
+                  </DropdownMenuLabel>
+                  {teams.map((team: any) => (
+                    <DropdownMenuItem
+                      key={team.id}
+                      onClick={() => setActiveTeamId(team.id)}
+                      className="gap-2 p-2"
+                    >
+                      <div className="flex size-6 items-center justify-center rounded-sm border">
+                        {/* Placeholder for team logo or initial */}
+                        <span className="text-xs font-bold uppercase">{team.name.charAt(0)}</span>
+                      </div>
+                      {team.name}
+                      {activeTeamId === team.id && (
+                        <DropdownMenuShortcut>✓</DropdownMenuShortcut>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
               </>
             )}
 

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/navigation";
+import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { teamInvites, teamMembers } from "@/lib/db/schema";
+import { teamInvites, teamMembers, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
@@ -19,12 +19,17 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const dbUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1).then(res => res[0]);
+    if (!dbUser) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const body = await req.json();
     const { teamId, email, role } = inviteSchema.parse(body);
 
     // İcazə yoxla (yalnız owner və admin dəvət göndərə bilər)
     const currentMembership = await db.query.teamMembers.findFirst({
-      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
+      where: and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, dbUser.id)),
     });
 
     if (!currentMembership || (currentMembership.role !== "owner" && currentMembership.role !== "admin")) {
@@ -40,7 +45,7 @@ export async function POST(req: Request) {
       email,
       role,
       token,
-      invitedBy: userId,
+      invitedBy: dbUser.id,
       expiresAt,
     }).returning();
 
@@ -68,6 +73,11 @@ export async function PUT(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const dbUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1).then(res => res[0]);
+    if (!dbUser) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const body = await req.json();
     const { token } = acceptInviteSchema.parse(body);
 
@@ -89,7 +99,7 @@ export async function PUT(req: Request) {
 
     // Əgər artıq üzvdürsə
     const existingMember = await db.query.teamMembers.findFirst({
-      where: and(eq(teamMembers.teamId, invite.teamId), eq(teamMembers.userId, userId)),
+      where: and(eq(teamMembers.teamId, invite.teamId), eq(teamMembers.userId, dbUser.id)),
     });
 
     if (existingMember) {
@@ -99,7 +109,7 @@ export async function PUT(req: Request) {
     await db.transaction(async (tx) => {
       await tx.insert(teamMembers).values({
         teamId: invite.teamId,
-        userId,
+        userId: dbUser.id,
         role: invite.role,
         invitedBy: invite.invitedBy,
       });
