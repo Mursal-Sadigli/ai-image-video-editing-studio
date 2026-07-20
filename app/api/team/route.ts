@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { teams, teamMembers, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
 const createTeamSchema = z.object({
   name: z.string().min(1, "Komanda adı boş ola bilməz").max(50),
@@ -25,27 +25,22 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name } = createTeamSchema.parse(body);
 
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + uuidv4().substring(0, 8);
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + crypto.randomUUID().substring(0, 8);
 
-    // Transaction daxilində komanda yarat və sahibi üzv kimi əlavə et
-    const [newTeam] = await db.transaction(async (tx) => {
-      const [team] = await tx.insert(teams).values({
-        name,
-        slug,
-        ownerId: dbUser.id,
-        creditsBalance: 0, // Başlanğıc kreditlər 0 və ya təyinatlı bir miqdar
-      }).returning();
+    const [team] = await db.insert(teams).values({
+      name,
+      slug,
+      ownerId: dbUser.id,
+      creditsBalance: 0, // Başlanğıc kreditlər 0 və ya təyinatlı bir miqdar
+    }).returning();
 
-      await tx.insert(teamMembers).values({
-        teamId: team.id,
-        userId: dbUser.id,
-        role: "owner", // Yaradan avtomatik owner olur
-      });
-
-      return [team];
+    await db.insert(teamMembers).values({
+      teamId: team.id,
+      userId: dbUser.id,
+      role: "owner", // Yaradan avtomatik owner olur
     });
 
-    return NextResponse.json({ team: newTeam });
+    return NextResponse.json({ team });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });

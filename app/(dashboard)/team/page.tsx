@@ -121,12 +121,12 @@ export default function TeamPage() {
             setInviteEmail("");
           }
         }}>
-          <DialogTrigger asChild>
+          <DialogTrigger render={
             <Button>
               <Mail className="mr-2 size-4" />
               Üzv Dəvət Et
             </Button>
-          </DialogTrigger>
+          } />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Komandaya dəvət göndər</DialogTitle>

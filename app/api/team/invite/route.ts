@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { teamInvites, teamMembers, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
 const inviteSchema = z.object({
   teamId: z.string(),
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const token = uuidv4();
+    const token = crypto.randomUUID();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 gün etibarlıdır
 
@@ -106,18 +106,16 @@ export async function PUT(req: Request) {
       return new NextResponse("Already a member", { status: 400 });
     }
 
-    await db.transaction(async (tx) => {
-      await tx.insert(teamMembers).values({
-        teamId: invite.teamId,
-        userId: dbUser.id,
-        role: invite.role,
-        invitedBy: invite.invitedBy,
-      });
-
-      await tx.update(teamInvites)
-        .set({ acceptedAt: new Date() })
-        .where(eq(teamInvites.id, invite.id));
+    await db.insert(teamMembers).values({
+      teamId: invite.teamId,
+      userId: dbUser.id,
+      role: invite.role,
+      invitedBy: invite.invitedBy,
     });
+
+    await db.update(teamInvites)
+      .set({ acceptedAt: new Date() })
+      .where(eq(teamInvites.id, invite.id));
 
     return NextResponse.json({ success: true, teamId: invite.teamId });
   } catch (error) {

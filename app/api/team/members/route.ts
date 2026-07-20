@@ -40,20 +40,32 @@ export async function GET(req: Request) {
       },
     });
 
-    // Clerk-dən istifadəçi məlumatlarını (ad, şəkil) çəkmək olar, amma hələlik db-də olan `users` datası ilə kifayətlənirik.
-    const formattedMembers = members.map((m) => ({
-      id: m.id,
-      userId: m.userId,
-      role: m.role,
-      joinedAt: m.joinedAt,
-      // Əgər users cədvəlində name/email varsa, buradan veririk. Yoxdursa Clerk-dən fethe etmək olar
-      user: {
-        id: m.user.id,
-        email: m.user.email,
-        name: m.user.firstName + " " + m.user.lastName,
-        imageUrl: m.user.profileImageUrl,
-      },
-    }));
+    // Clerk-dən istifadəçi məlumatlarını (ad, şəkil) çəkmək
+    const client = await clerkClient();
+    const clerkUserList = await client.users.getUserList({
+      userId: members.map(m => m.user.clerkId)
+    });
+
+    const formattedMembers = members.map((m) => {
+      const clerkUser = clerkUserList.data.find(u => u.id === m.user.clerkId);
+      const fullName = clerkUser 
+        ? `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() 
+        : m.user.fullName;
+      const imageUrl = clerkUser ? clerkUser.imageUrl : m.user.avatarUrl;
+
+      return {
+        id: m.id,
+        userId: m.userId,
+        role: m.role,
+        joinedAt: m.joinedAt,
+        user: {
+          id: m.user.id,
+          email: m.user.email,
+          name: fullName || "Naməlum İstifadəçi",
+          imageUrl: imageUrl,
+        },
+      };
+    });
 
     return NextResponse.json({ members: formattedMembers });
   } catch (error) {
