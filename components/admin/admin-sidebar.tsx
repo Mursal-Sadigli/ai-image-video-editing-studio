@@ -49,7 +49,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin" />} 
                   isActive={pathname === "/admin"}
-                  className="hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
                 >
                   <LayoutDashboard className="size-4" />
                   <span>İcmal (Dashboard)</span>
@@ -59,7 +59,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin/users" />} 
                   isActive={pathname.startsWith("/admin/users")}
-                  className="hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
                 >
                   <Users className="size-4" />
                   <span>İstifadəçilər</span>
@@ -69,7 +69,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin/transactions" />} 
                   isActive={pathname.startsWith("/admin/transactions")}
-                  className="hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
                 >
                   <CreditCard className="size-4" />
                   <span>Tranzaksiyalar</span>

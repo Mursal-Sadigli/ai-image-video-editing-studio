@@ -71,7 +71,13 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full overflow-hidden bg-muted">
                         {user.avatarUrl ? (
-                          <img src={user.avatarUrl} alt="avatar" />
+                          <img 
+                            src={user.avatarUrl} 
+                            alt="avatar" 
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
                         ) : (
                           <div className="h-full w-full bg-slate-200 dark:bg-slate-800" />
                         )}
