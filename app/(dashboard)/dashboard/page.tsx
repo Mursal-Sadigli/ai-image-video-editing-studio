@@ -128,8 +128,8 @@ export default async function DashboardPage() {
               <History className="h-6 w-6 opacity-50" />
             </div>
             <p>Hələ heç bir generasiya etməmisiniz.</p>
-            <Link href="/studio/image-generation" className="mt-4 text-primary hover:underline font-medium text-sm">
-              İlk şəklinizi yaradın
+            <Link href="/studio/image-to-image" className="mt-4 text-primary hover:underline font-medium text-sm">
+              İlk əməliyyatınızı edin
             </Link>
           </CardContent>
         </Card>

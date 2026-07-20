@@ -4,18 +4,7 @@ import { ArrowRight, Check, Image as ImageIcon, Film, Eraser, ZoomIn, Wand2 } fr
 import { buttonVariants } from "@/components/ui/button";
 
 const toolsData = {
-  "image-generation": {
-    name: "AI Şəkil Generasiyası",
-    icon: ImageIcon,
-    desc: "Yalnız bir mətn (prompt) yazaraq xəyalınızdakı fotoları gerçəkləşdirin. VisionAI-nin alqoritmləri sayəsində əldə etdiyiniz şəkillər adi AI alətlərindən fərqli olaraq tamamilə real foto kimidir.",
-    color: "from-blue-500 to-indigo-500",
-    features: [
-      "Photorealistic tekstura və işıqlandırma",
-      "Saniyələr içində 4 fərqli variant",
-      "İstənilən aspekt nisbətini (16:9, 9:16, 1:1) dəstəkləyir",
-      "Kommersiya məqsədləri üçün tam lisenziya"
-    ]
-  },
+
   "video-generation": {
     name: "AI Video Generasiyası",
     icon: Film,

@@ -2,20 +2,57 @@
 
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export function PricingPreviewSection() {
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleCheckout = async (id: string) => {
+    if (!isSignedIn) {
+      router.push("/sign-up");
+      return;
+    }
+    
+    try {
+      setLoadingId(id);
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "plan", planId: id }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Xəta baş verdi");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Gözlənilməz xəta baş verdi");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   const plans = [
     {
+      id: "free",
       name: "Free",
       price: "0",
       description: "Platformanı test etmək üçün ideal başlanğıc",
-      features: ["20 Pulsuz Kredit", "Standart Keyfiyyət", "Şəkil Generasiyası", "İcma Dəstəyi"],
+      features: ["20 Pulsuz Kredit", "Standart Keyfiyyət", "İcma Dəstəyi"],
       buttonText: "Pulsuz Başla",
       buttonVariant: "outline" as const,
       popular: false,
     },
     {
+      id: "pro",
       name: "Pro",
       price: "29",
       description: "Peşəkarlar və mütəmadi istifadəçilər üçün",
@@ -73,12 +110,15 @@ export function PricingPreviewSection() {
                 ))}
               </ul>
               
-              <Link 
-                href="/sign-up" 
-                className={buttonVariants({ variant: plan.buttonVariant, className: "w-full rounded-full h-10" })}
+              <Button 
+                variant={plan.buttonVariant} 
+                className="w-full rounded-full h-10"
+                disabled={loadingId === plan.id}
+                onClick={() => plan.id === "free" ? router.push(isSignedIn ? "/dashboard" : "/sign-up") : handleCheckout(plan.id)}
               >
+                {loadingId === plan.id && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {plan.buttonText}
-              </Link>
+              </Button>
             </div>
           ))}
         </div>

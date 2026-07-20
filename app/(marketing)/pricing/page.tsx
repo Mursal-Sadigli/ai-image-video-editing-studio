@@ -2,20 +2,55 @@
 
 import Link from "next/link";
 import { Check, Info } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/marketing/faq";
 import { motion } from "framer-motion";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function PricingPage() {
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleCheckout = async (type: "plan" | "credit_pack", id: string, amount?: number, price?: number) => {
+    if (!isSignedIn) {
+      router.push("/sign-up");
+      return;
+    }
+    
+    try {
+      setLoadingId(id);
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, planId: id, creditsAmount: amount, priceCents: price }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Xəta baş verdi");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Gözlənilməz xəta baş verdi");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   const subscriptions = [
     {
+      id: "free",
       name: "Free",
       price: "0",
       description: "Platformanı test etmək üçün ideal başlanğıc",
       features: [
         "20 Pulsuz Kredit",
         "Standart Keyfiyyət",
-        "Şəkil Generasiyası",
         "Arxa Fon Silinməsi",
         "İcma Dəstəyi"
       ],
@@ -24,6 +59,7 @@ export default function PricingPage() {
       popular: false,
     },
     {
+      id: "pro",
       name: "Pro",
       price: "29",
       description: "Peşəkarlar və mütəmadi istifadəçilər üçün",
@@ -40,6 +76,7 @@ export default function PricingPage() {
       popular: true,
     },
     {
+      id: "business",
       name: "Business",
       price: "99",
       description: "Agentliklər və böyük komandalar üçün limitsiz güc",
@@ -127,12 +164,16 @@ export default function PricingPage() {
                 ))}
               </ul>
               
-              <Link 
-                href="/sign-up" 
-                className={buttonVariants({ variant: plan.buttonVariant, size: "lg", className: "w-full rounded-full h-12" })}
+              <Button 
+                variant={plan.buttonVariant} 
+                size="lg" 
+                className="w-full rounded-full h-12"
+                disabled={loadingId === plan.id}
+                onClick={() => plan.id === "free" ? router.push(isSignedIn ? "/dashboard" : "/sign-up") : handleCheckout("plan", plan.id)}
               >
+                {loadingId === plan.id && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {plan.buttonText}
-              </Link>
+              </Button>
             </motion.div>
           ))}
         </div>
@@ -154,9 +195,15 @@ export default function PricingPage() {
                 <div className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">{pack.name}</div>
                 <div className="text-4xl font-black text-indigo-500 mb-2">{pack.credits} <span className="text-2xl text-foreground font-bold">Kredit</span></div>
                 <div className="text-2xl font-semibold mb-6">${pack.price}</div>
-                <Link href="/sign-up" className={buttonVariants({ variant: pack.popular ? "default" : "secondary", className: "w-full rounded-full" })}>
+                <Button 
+                  variant={pack.popular ? "default" : "secondary"} 
+                  className="w-full rounded-full"
+                  disabled={loadingId === `pack-${i}`}
+                  onClick={() => handleCheckout("credit_pack", `pack-${i}`, pack.credits, pack.price * 100)}
+                >
+                  {loadingId === `pack-${i}` && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Paketi Al
-                </Link>
+                </Button>
               </div>
             ))}
           </div>
