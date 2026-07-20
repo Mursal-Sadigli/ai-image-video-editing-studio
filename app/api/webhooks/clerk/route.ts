@@ -5,6 +5,7 @@ import {
   syncUpdatedUser,
 } from "@/lib/clerk/sync-user";
 import { deleteUser } from "@/lib/db/queries/users";
+import { sendWelcomeEmail } from "@/lib/email/resend";
 
 // =========================================================
 // Clerk Webhook Handler
@@ -97,8 +98,11 @@ export async function POST(req: NextRequest) {
           avatarUrl: event.data.image_url,
         });
 
+        // Xoş Gəldin e-poçtu göndər
+        await sendWelcomeEmail(primaryEmail.email_address, event.data.first_name || undefined);
+
         console.log(
-          `[Clerk Webhook] Yeni istifadəçi yaradıldı: ${primaryEmail.email_address}`
+          `[Clerk Webhook] Yeni istifadəçi sinxronizasiya edildi və email göndərildi: ${event.data.id}`
         );
         break;
       }

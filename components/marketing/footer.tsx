@@ -21,7 +21,6 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Xüsusiyyətlər</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/features/image-generation" className="hover:text-primary transition-colors">Şəkil Generasiyası</Link></li>
               <li><Link href="/features/video-generation" className="hover:text-primary transition-colors">Video Generasiyası</Link></li>
               <li><Link href="/features/background-removal" className="hover:text-primary transition-colors">Arxa Fon Silinməsi</Link></li>
               <li><Link href="/features/upscaler" className="hover:text-primary transition-colors">Keyfiyyətin Artırılması</Link></li>

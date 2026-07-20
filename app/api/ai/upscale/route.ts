@@ -7,11 +7,27 @@ import { CREDIT_COSTS } from "@/config/pricing";
 import { deductCredits } from "@/lib/credits/deduct";
 import { CREDIT_COSTS } from "@/config/pricing";
 import { eq } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { success, limit, remaining, reset } = await checkRateLimit(user.id);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Çoxlu sayda sorğu göndərdiniz. Lütfən bir az sonra yenidən cəhd edin." },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          }
+        }
+      );
+    }
 
     const { fileUrl, scale, teamId } = await req.json();
     if (!fileUrl) {

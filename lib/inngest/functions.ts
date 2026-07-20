@@ -1,7 +1,8 @@
 import { inngest } from "./client";
 import { db } from "@/lib/db";
-import { generations, files } from "@/lib/db/schema";
+import { generations, files, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { sendJobCompletedEmail } from "@/lib/email/resend";
 
 interface EventData {
   generationId: string;
@@ -20,6 +21,21 @@ const mockAiProcess = async (type: string, payload: Record<string, unknown>) => 
         id: `mock_file_${Date.now()}`
       });
     }, 4000);
+  });
+};
+
+const sendCompletedEmailStep = async (step: any, userId: string, jobName: string) => {
+  return await step.run("send-email", async () => {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+    if (user?.email) {
+      await sendJobCompletedEmail(
+        user.email,
+        user.fullName?.split(" ")[0] || undefined,
+        jobName
+      );
+    }
   });
 };
 
