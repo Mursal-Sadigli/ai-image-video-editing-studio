@@ -1,8 +1,22 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminTransactionsPage() {
   const { data: transactions, isLoading } = useQuery({
@@ -15,10 +29,52 @@ export default function AdminTransactionsPage() {
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/transactions", { method: "DELETE" });
+      if (!res.ok) throw new Error("Silinmə zamanı xəta");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Bütün loqlar silindi");
+      queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
+    },
+    onError: () => {
+      toast.error("Xəta baş verdi");
+    }
+  });
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Kredit Tranzaksiyaları (Loqlar)</h2>
+        <AlertDialog>
+          <AlertDialogTrigger render={
+            <Button variant="destructive" size="sm" disabled={!transactions?.length || deleteAllMutation.isPending}>
+              <Trash className="mr-2 h-4 w-4" />
+              Hamısını Sil
+            </Button>
+          } />
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Əminsinizmi?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bu əməliyyat geri qaytarıla bilməz. Bütün kredit əməliyyat loqları sistemdən birdəfəlik silinəcək.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Ləğv et</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => deleteAllMutation.mutate()}
+                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
+              >
+                Bəli, hamısını sil
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="rounded-md border bg-white dark:bg-slate-950">

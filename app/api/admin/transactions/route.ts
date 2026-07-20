@@ -35,3 +35,29 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const dbAdmin = await db.query.users.findFirst({
+      where: eq(users.clerkId, clerkId),
+    });
+
+    if (!dbAdmin || (dbAdmin.role !== "admin" && dbAdmin.role !== "owner")) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    // Bütün tranzaksiyaları sil
+    await db.delete(creditTransactions);
+
+    return NextResponse.json({ success: true, message: "Bütün loqlar silindi" });
+  } catch (error) {
+    console.error("[ADMIN_TRANSACTIONS_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
