@@ -8,6 +8,13 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ParticleWave } from "@/components/ui/particle-wave";
 import { useAuth } from "@clerk/nextjs";
 
+// Yeni yaradılmış komponentlər
+import { BeforeAfterSection } from "@/components/marketing/before-after-section";
+import { HowItWorksSection } from "@/components/marketing/how-it-works";
+import { TestimonialsSection } from "@/components/marketing/testimonials";
+import { PricingPreviewSection } from "@/components/marketing/pricing-preview";
+import { FaqSection } from "@/components/marketing/faq";
+
 export default function LandingPage() {
   const { userId } = useAuth();
   const containerVariants = {
@@ -103,6 +110,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Logo Cloud / Sosial Sübut */}
+      <section className="w-full py-12 border-y bg-zinc-50 dark:bg-zinc-900/20 overflow-hidden">
+        <div className="container px-4 md:px-6 text-center">
+          <p className="text-sm font-medium text-muted-foreground mb-6 uppercase tracking-wider">
+            Aparıcı komandalar və şirkətlər tərəfindən istifadə olunur
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale">
+            {/* Real loqolarla əvəz edilə bilər. Hələlik mətn-loqolar */}
+            {["Google", "Amazon", "Microsoft", "Netflix", "Spotify"].map((logo, i) => (
+              <span key={i} className="text-xl md:text-2xl font-bold tracking-tighter text-zinc-900 dark:text-zinc-400">
+                {logo}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Before / After Slider Bölməsi */}
+      <BeforeAfterSection />
+
+      {/* Necə İşləyir Bölməsi */}
+      <HowItWorksSection />
+
       {/* Features Showcase */}
       <section className="w-full py-24 md:py-32 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="container px-4 md:px-6">
@@ -143,6 +173,15 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Müştəri Rəyləri */}
+      <TestimonialsSection />
+
+      {/* Qiymətləndirmə Preview */}
+      <PricingPreviewSection />
+
+      {/* Tez-tez Verilən Suallar */}
+      <FaqSection />
 
       {/* CTA Banner */}
       <section className="relative w-full py-24 md:py-32 overflow-hidden">

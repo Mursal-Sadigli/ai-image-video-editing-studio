@@ -80,12 +80,12 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-slate-800 pt-4">
+      <SidebarFooter className="border-t border-slate-200 dark:border-slate-800 pt-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
               render={<Link href="/dashboard" />}
-              className="text-slate-400 hover:bg-slate-800 hover:text-white"
+              className="font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <ArrowLeft className="size-4" />
               <span>Platformaya Qayıt</span>
@@ -97,13 +97,13 @@ export function AdminSidebar() {
                 afterSignOutUrl="/" 
                 appearance={{
                   elements: {
-                    userButtonAvatarBox: "size-8 rounded-full border border-slate-700"
+                    userButtonAvatarBox: "size-8 rounded-full border border-slate-200 dark:border-slate-700"
                   }
                 }}
               />
               {state !== "collapsed" && (
                 <div className="flex flex-col overflow-hidden">
-                  <span className="truncate text-sm font-medium text-slate-200">
+                  <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-200">
                     {user?.fullName || user?.firstName || "Admin"}
                   </span>
                   <span className="truncate text-xs text-slate-500">

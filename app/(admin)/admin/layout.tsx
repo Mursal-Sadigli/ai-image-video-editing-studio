@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export default async function AdminLayout({
@@ -30,7 +30,11 @@ export default async function AdminLayout({
     <SidebarProvider>
       <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
         <AdminSidebar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto flex flex-col">
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 px-6 backdrop-blur">
+            <SidebarTrigger />
+            <div className="font-semibold text-sm">Admin Tənzimləmələri</div>
+          </header>
           {children}
         </main>
       </div>
