@@ -37,8 +37,12 @@ export default function BackgroundRemovalPage() {
         toast.success("Arxa fon uğurla silindi!");
       }, 5000);
 
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Xəta baş verdi");
+      }
       setIsGenerating(false);
     }
   };

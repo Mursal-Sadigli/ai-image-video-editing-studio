@@ -30,7 +30,7 @@ export default async function StudioPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {AI_TOOLS.filter(t => t.isAvailable).map((tool) => {
-          const Icon = (Icons as any)[tool.icon] || Icons.Wand2;
+          const Icon = Icons[tool.icon as keyof typeof Icons] || Icons.Wand2;
           
           return (
             <Link key={tool.id} href={tool.href}>

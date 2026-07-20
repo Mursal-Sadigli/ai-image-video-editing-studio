@@ -35,8 +35,12 @@ export default function UpscalerPage() {
         toast.success(`Şəkil uğurla ${scale}x böyüdüldü!`);
       }, 5000);
 
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Xəta baş verdi");
+      }
       setIsGenerating(false);
     }
   };

@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       type: "background_removal",
       status: "queued",
       prompt: "Arxa fon silinməsi",
-      cost,
+      creditsCost: cost,
     }).returning({ id: generations.id });
 
     // Inngest Event
@@ -49,8 +49,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ generationId: generation.id });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[BG_REMOVAL_ERROR]", error);
-    return NextResponse.json({ error: error.message || "Xəta baş verdi" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Xəta baş verdi";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

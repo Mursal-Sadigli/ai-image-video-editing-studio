@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       type: "upscale",
       status: "queued",
       prompt: `${scale}x Upscale`,
-      cost,
+      creditsCost: cost,
     }).returning({ id: generations.id });
 
     // Inngest Event
@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ generationId: generation.id });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[UPSCALER_ERROR]", error);
-    return NextResponse.json({ error: error.message || "Xəta baş verdi" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Xəta baş verdi";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
