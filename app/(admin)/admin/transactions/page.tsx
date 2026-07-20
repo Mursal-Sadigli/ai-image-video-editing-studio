@@ -17,8 +17,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export default function AdminTransactionsPage() {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["admin_transactions"],
     queryFn: async () => {
@@ -39,6 +41,7 @@ export default function AdminTransactionsPage() {
     },
     onSuccess: () => {
       toast.success("Bütün loqlar silindi");
+      setIsDeleteDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
     },
     onError: () => {
@@ -50,7 +53,7 @@ export default function AdminTransactionsPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Kredit Tranzaksiyaları (Loqlar)</h2>
-        <AlertDialog>
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogTrigger render={
             <Button variant="destructive" size="sm" disabled={!transactions?.length || deleteAllMutation.isPending}>
               <Trash className="mr-2 h-4 w-4" />
@@ -67,7 +70,10 @@ export default function AdminTransactionsPage() {
             <AlertDialogFooter>
               <AlertDialogCancel>Ləğv et</AlertDialogCancel>
               <AlertDialogAction 
-                onClick={() => deleteAllMutation.mutate()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  deleteAllMutation.mutate();
+                }}
                 className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
               >
                 Bəli, hamısını sil

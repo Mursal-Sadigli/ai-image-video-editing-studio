@@ -25,7 +25,7 @@ export function AdminSidebar() {
   const { state } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon" className="bg-slate-950 text-slate-200 border-r-slate-800">
+    <Sidebar collapsible="icon" className="border-r border-slate-200 dark:border-slate-800">
       <SidebarHeader className="border-b border-slate-800 pb-4">
         <div className="flex items-center gap-2 px-2 py-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-red-600 text-white">
@@ -33,8 +33,8 @@ export function AdminSidebar() {
           </div>
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="font-bold text-sm text-slate-100">Admin Panel</span>
-              <span className="text-xs text-slate-400">İdarəetmə Mərkəzi</span>
+              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">Admin Panel</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">İdarəetmə Mərkəzi</span>
             </div>
           )}
         </div>
@@ -49,7 +49,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin" />} 
                   isActive={pathname === "/admin"}
-                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 data-[active=true]:bg-slate-100 dark:data-[active=true]:bg-slate-800"
                 >
                   <LayoutDashboard className="size-4" />
                   <span>İcmal (Dashboard)</span>
@@ -59,7 +59,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin/users" />} 
                   isActive={pathname.startsWith("/admin/users")}
-                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 data-[active=true]:bg-slate-100 dark:data-[active=true]:bg-slate-800"
                 >
                   <Users className="size-4" />
                   <span>İstifadəçilər</span>
@@ -69,7 +69,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   render={<Link href="/admin/transactions" />} 
                   isActive={pathname.startsWith("/admin/transactions")}
-                  className="text-slate-200 hover:bg-slate-800 hover:text-white data-[active=true]:bg-slate-800 data-[active=true]:text-white"
+                  className="font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 data-[active=true]:bg-slate-100 dark:data-[active=true]:bg-slate-800"
                 >
                   <CreditCard className="size-4" />
                   <span>Tranzaksiyalar</span>
