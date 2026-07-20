@@ -1,7 +1,15 @@
-import { inngest } from "../client";
+import { inngest } from "./client";
 import { db } from "@/lib/db";
 import { generations, files } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+
+interface EventData {
+  generationId: string;
+  userId: string;
+  fileUrl?: string;
+  prompt?: string;
+  scale?: number;
+}
 
 // Dummy Mock AI Processor Function
 const mockAiProcess = async (type: string, payload: Record<string, unknown>) => {
@@ -16,33 +24,30 @@ const mockAiProcess = async (type: string, payload: Record<string, unknown>) => 
 };
 
 export const processBackgroundRemoval = inngest.createFunction(
-  { id: "process-background-removal" },
-  { event: "ai/background-removal" },
+  { id: "process-background-removal", triggers: [{ event: "ai/background-removal" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl } = event.data;
+    const { generationId, userId, fileUrl } = event.data as EventData;
 
-    // 1. Emulyasiya edilmiş AI Prosesi
     const result = await step.run("run-ai-model", async () => {
       return await mockAiProcess("background_removal", { fileUrl });
     });
 
-    // 2. Faylı bazaya yaz
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "bg-removed.png",
+        fileName: "bg-removed.png",
         url: result.url,
-        type: "image",
-        size: 1024,
+        fileType: "image",
+        sizeBytes: 1024,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
 
-    // 3. Generasiyanı tamamla
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });
@@ -52,10 +57,9 @@ export const processBackgroundRemoval = inngest.createFunction(
 );
 
 export const processUpscaler = inngest.createFunction(
-  { id: "process-upscaler" },
-  { event: "ai/upscaler" },
+  { id: "process-upscaler", triggers: [{ event: "ai/upscaler" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl, scale } = event.data;
+    const { generationId, userId, fileUrl, scale } = event.data as EventData;
 
     const result = await step.run("run-ai-model", async () => {
       return await mockAiProcess("upscaler", { fileUrl, scale });
@@ -64,10 +68,11 @@ export const processUpscaler = inngest.createFunction(
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "upscaled.png",
+        fileName: "upscaled.png",
         url: result.url,
-        type: "image",
-        size: 4096,
+        fileType: "image",
+        sizeBytes: 2048,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
@@ -75,7 +80,7 @@ export const processUpscaler = inngest.createFunction(
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });
@@ -85,10 +90,9 @@ export const processUpscaler = inngest.createFunction(
 );
 
 export const processImageToImage = inngest.createFunction(
-  { id: "process-image-to-image" },
-  { event: "ai/image-to-image" },
+  { id: "process-image-to-image", triggers: [{ event: "ai/image-to-image" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl, prompt } = event.data;
+    const { generationId, userId, fileUrl, prompt } = event.data as EventData;
 
     const result = await step.run("run-ai-model", async () => {
       return await mockAiProcess("image_to_image", { fileUrl, prompt });
@@ -97,10 +101,11 @@ export const processImageToImage = inngest.createFunction(
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "img2img.png",
+        fileName: "img-to-img.png",
         url: result.url,
-        type: "image",
-        size: 2048,
+        fileType: "image",
+        sizeBytes: 1024,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
@@ -108,7 +113,7 @@ export const processImageToImage = inngest.createFunction(
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });
@@ -118,10 +123,9 @@ export const processImageToImage = inngest.createFunction(
 );
 
 export const processObjectRemoval = inngest.createFunction(
-  { id: "process-object-removal" },
-  { event: "ai/object-removal" },
+  { id: "process-object-removal", triggers: [{ event: "ai/object-removal" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl, prompt } = event.data;
+    const { generationId, userId, fileUrl, prompt } = event.data as EventData;
 
     const result = await step.run("run-ai-model", async () => {
       return await mockAiProcess("object_removal", { fileUrl, prompt });
@@ -130,10 +134,11 @@ export const processObjectRemoval = inngest.createFunction(
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "obj-removed.png",
+        fileName: "obj-removed.png",
         url: result.url,
-        type: "image",
-        size: 1024,
+        fileType: "image",
+        sizeBytes: 1024,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
@@ -141,7 +146,7 @@ export const processObjectRemoval = inngest.createFunction(
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });
@@ -151,13 +156,11 @@ export const processObjectRemoval = inngest.createFunction(
 );
 
 export const processVideoGeneration = inngest.createFunction(
-  { id: "process-video-generation" },
-  { event: "ai/generate-video" },
+  { id: "process-video-generation", triggers: [{ event: "ai/generate-video" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl, prompt } = event.data;
+    const { generationId, userId, fileUrl, prompt } = event.data as EventData;
 
     const result = await step.run("run-ai-model", async () => {
-      // return a dummy video url
       return new Promise<{ url: string; id: string }>((resolve) => {
         setTimeout(() => {
           resolve({
@@ -171,10 +174,11 @@ export const processVideoGeneration = inngest.createFunction(
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "generated-video.mp4",
+        fileName: "generated-video.mp4",
         url: result.url,
-        type: "video",
-        size: 51200, // 50mb mock
+        fileType: "video",
+        sizeBytes: 51200,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
@@ -182,7 +186,7 @@ export const processVideoGeneration = inngest.createFunction(
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });
@@ -192,10 +196,9 @@ export const processVideoGeneration = inngest.createFunction(
 );
 
 export const processVideoEditing = inngest.createFunction(
-  { id: "process-video-editing" },
-  { event: "ai/video-editing" },
+  { id: "process-video-editing", triggers: [{ event: "ai/video-editing" }] },
   async ({ event, step }) => {
-    const { generationId, userId, fileUrl, prompt } = event.data;
+    const { generationId, userId, fileUrl, prompt } = event.data as EventData;
 
     const result = await step.run("run-ai-model", async () => {
       return new Promise<{ url: string; id: string }>((resolve) => {
@@ -211,10 +214,11 @@ export const processVideoEditing = inngest.createFunction(
     const fileRecordId = await step.run("save-file", async () => {
       const [newFile] = await db.insert(files).values({
         userId,
-        name: "edited-video.mp4",
+        fileName: "edited-video.mp4",
         url: result.url,
-        type: "video",
-        size: 51200,
+        fileType: "video",
+        sizeBytes: 51200,
+        imagekitFileId: result.id,
       }).returning({ id: files.id });
       return newFile.id;
     });
@@ -222,7 +226,7 @@ export const processVideoEditing = inngest.createFunction(
     await step.run("update-generation", async () => {
       await db.update(generations).set({
         status: "completed",
-        fileId: fileRecordId,
+        outputFileId: fileRecordId,
         completedAt: new Date(),
       }).where(eq(generations.id, generationId));
     });

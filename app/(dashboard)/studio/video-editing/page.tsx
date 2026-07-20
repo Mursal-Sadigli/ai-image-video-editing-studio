@@ -6,8 +6,10 @@ import { FileUpload } from "@/components/studio/file-upload";
 import { CREDIT_COSTS } from "@/config/pricing";
 import { toast } from "sonner";
 import { Film, PlaySquare } from "lucide-react";
+import { useActiveTeam } from "@/hooks/use-active-team";
 
 export default function VideoEditingPage() {
+  const { activeTeamId } = useActiveTeam();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -27,7 +29,7 @@ export default function VideoEditingPage() {
       const res = await fetch("/api/ai/video-editing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl, prompt }),
+        body: JSON.stringify({ fileUrl, prompt, teamId: activeTeamId }),
       });
 
       const data = await res.json();

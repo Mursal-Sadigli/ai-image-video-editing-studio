@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sparkles, LayoutDashboard, FolderOpen, History, Settings, Users, CreditCard, Wand2 } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { AI_TOOLS } from "@/config/ai-tools";
+import { TeamSwitcher } from "./team-switcher";
 
 import {
   Sidebar,
@@ -37,19 +38,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Sparkles className="size-4 animate-sparkle" />
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold text-lg">VisionAI</span>
-                <span className="text-xs text-muted-foreground">Studio</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

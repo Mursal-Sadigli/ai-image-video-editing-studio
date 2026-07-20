@@ -6,8 +6,10 @@ import { FileUpload } from "@/components/studio/file-upload";
 import { CREDIT_COSTS } from "@/config/pricing";
 import { toast } from "sonner";
 import { Image as ImageIcon } from "lucide-react";
+import { useActiveTeam } from "@/hooks/use-active-team";
 
 export default function UpscalerPage() {
+  const { activeTeamId } = useActiveTeam();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [scale, setScale] = useState<number>(2);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,7 +25,7 @@ export default function UpscalerPage() {
       const res = await fetch("/api/ai/upscale", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl, scale }),
+        body: JSON.stringify({ fileUrl, scale, teamId: activeTeamId }),
       });
 
       const data = await res.json();

@@ -11,9 +11,11 @@ import { useAuth } from "@clerk/nextjs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
 import { AI_MODELS } from "@/lib/ai/models";
+import { useActiveTeam } from "@/hooks/use-active-team";
 
 export default function ImageGenerationPage() {
   const { isLoaded, userId } = useAuth();
+  const { activeTeamId } = useActiveTeam();
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [style, setStyle] = useState("photorealistic");
@@ -62,7 +64,7 @@ export default function ImageGenerationPage() {
       const res = await fetch("/api/ai/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, aspectRatio, style, modelId }),
+        body: JSON.stringify({ prompt, aspectRatio, style, modelId, teamId: activeTeamId }),
       });
 
       const data = await res.json();
