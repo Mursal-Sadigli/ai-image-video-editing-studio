@@ -1,12 +1,56 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLANS, CREDIT_PACKS } from "@/config/pricing";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function PricingPage() {
+  const { userId, isLoaded } = useAuth();
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   const plansList = Object.values(PLANS);
+
+  const handleCheckout = async (type: "plan" | "pack", id: string, amount?: number, price?: number) => {
+    if (!isLoaded) return;
+    
+    if (!userId) {
+      router.push("/sign-up");
+      return;
+    }
+
+    try {
+      setLoadingId(id);
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          type, 
+          planId: type === "plan" ? id : undefined,
+          creditsAmount: type === "pack" ? amount : undefined,
+          priceCents: price
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Xəta baş verdi");
+      }
+
+      window.location.href = data.url;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 md:py-32 w-full">
@@ -54,7 +98,16 @@ export default function PricingPage() {
             <Button
               className="w-full rounded-xl h-12"
               variant={plan.popular ? "default" : "outline"}
+              disabled={loadingId === plan.id}
+              onClick={() => {
+                if (plan.id === "free") {
+                  router.push(userId ? "/dashboard" : "/sign-up");
+                } else {
+                  handleCheckout("plan", plan.id, plan.monthlyCredits, plan.priceMonthly);
+                }
+              }}
             >
+              {loadingId === plan.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {plan.id === "free" ? "Pulsuz Başla" : "Planı Seç"}
             </Button>
           </motion.div>
@@ -73,7 +126,13 @@ export default function PricingPage() {
               <div className="text-3xl font-bold mb-2">{pack.credits}</div>
               <div className="text-muted-foreground text-sm mb-4">credit</div>
               <div className="text-xl font-semibold mb-6">${pack.priceCents / 100}</div>
-              <Button variant={pack.popular ? "default" : "outline"} className="w-full rounded-full">
+              <Button 
+                variant={pack.popular ? "default" : "outline"} 
+                className="w-full rounded-full"
+                disabled={loadingId === `pack-${pack.credits}`}
+                onClick={() => handleCheckout("pack", `pack-${pack.credits}`, pack.credits, pack.priceCents)}
+              >
+                {loadingId === `pack-${pack.credits}` ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Alın
               </Button>
             </div>

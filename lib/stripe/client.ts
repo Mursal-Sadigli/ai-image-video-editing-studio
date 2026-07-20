@@ -5,7 +5,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-06-20", // or your preferred apiVersion
+  apiVersion: "2025-01-27.acacia", // 最新 versiya
   appInfo: {
     name: "Vision AI Studio",
     version: "1.0.0",

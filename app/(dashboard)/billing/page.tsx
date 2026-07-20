@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { PLANS, CREDIT_PACKS } from "@/config/pricing";
+import { format } from "date-fns";
+import { az } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,13 +14,24 @@ export default function BillingPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [subscription, setSubscription] = useState<any>(null);
 
-  // Gələcəkdə Server Component-də db-dən oxumaq olar, amma indi MVP üçün /api endpoint çağırırıq (yoxdursa sadə mock)
-  // Reallıqda `/api/credits/balance` olmalıdır. Mən mock data qoyuram ki, istifadəçi görsün.
   useEffect(() => {
-    // Burada əslində balance endpointinə fetch olmalıdır
-    setBalance(20);
-  }, []);
+    if (user?.id) {
+      fetch("/api/subscriptions/current")
+        .then(res => res.json())
+        .then(data => {
+          if (data.subscription) {
+            setSubscription(data.subscription);
+          }
+        })
+        .catch(console.error);
+        
+      setBalance(20);
+    }
+  }, [user]);
+
+  const currentPlanId = subscription?.status === "active" ? subscription.plan : "free";
 
   const handleBuyCredits = async (amount: number) => {
     try {
@@ -33,7 +47,6 @@ export default function BillingPage() {
         throw new Error(data.error || "Xəta baş verdi");
       }
 
-      // Yönləndirmə
       window.location.href = data.url;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -57,11 +70,31 @@ export default function BillingPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Balans Kartı */}
-        <Card className="md:col-span-1 border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle>Sizin Cari Planınız</CardTitle>
+            <CardDescription>
+              {currentPlanId === "free" ? "Aktiv ödənişli planınız yoxdur" : "Abonəliyiniz aktivdir"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-3xl font-bold capitalize">{currentPlanId === "free" ? "Pulsuz" : currentPlanId} Plan</p>
+                {subscription && subscription.status === "active" && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Növbəti yenilənmə: {format(new Date(subscription.currentPeriodEnd), "dd MMMM yyyy", { locale: az })}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-primary" />
               Cari Balans
             </CardTitle>
@@ -71,62 +104,26 @@ export default function BillingPage() {
             <p className="text-sm text-muted-foreground mt-2">kredit qaldı</p>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Paket Alış Kartları */}
-        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {CREDIT_PACKS.map((pack) => (
+          <Card key={pack.name}>
             <CardHeader>
-              <CardTitle>100 Kredit</CardTitle>
-              <CardDescription>Sürətli başlanğıc üçün</CardDescription>
+              <CardTitle>{pack.name}</CardTitle>
+              <CardDescription>{pack.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">$5.00</div>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500"/> Bütün AI alətləri</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500"/> Son istifadə tarixi yoxdur</li>
-              </ul>
+              <div className="text-3xl font-bold">${pack.price}</div>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
-                onClick={() => handleBuyCredits(100)} 
-                disabled={isLoading}
-              >
+              <Button className="w-full" onClick={() => handleBuyCredits(pack.credits)} disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Satın Al
               </Button>
             </CardFooter>
           </Card>
-
-          <Card className="border-primary shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
-              Populyar
-            </div>
-            <CardHeader>
-              <CardTitle>500 Kredit</CardTitle>
-              <CardDescription>Peşəkar layihələr üçün</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">$20.00</div>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500"/> Bütün AI alətləri</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500"/> Son istifadə tarixi yoxdur</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500"/> 20% qənaət (bonus)</li>
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full" 
-                variant="default"
-                onClick={() => handleBuyCredits(500)} 
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Satın Al
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+        ))}
       </div>
     </div>
   );

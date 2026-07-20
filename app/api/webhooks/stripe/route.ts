@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
-import { handleCheckoutSessionCompleted } from "@/lib/stripe/webhook-handles";
+import { handleCheckoutSessionCompleted, handleSubscriptionChange } from "@/lib/stripe/webhook-handles";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -29,6 +29,13 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object;
         await handleCheckoutSessionCompleted(session);
+        break;
+      }
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        await handleSubscriptionChange(subscription);
         break;
       }
       default:
