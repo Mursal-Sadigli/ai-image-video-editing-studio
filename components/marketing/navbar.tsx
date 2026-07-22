@@ -42,13 +42,13 @@ export async function Navbar() {
             Bloq
           </Link>
         </nav>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
           {!userId ? (
             <>
-              <Link href="/sign-in" className="text-sm font-medium hidden md:block hover:text-primary transition-colors">
+              <Link href="/sign-in" className="text-sm font-medium hover:text-primary transition-colors">
                 Giriş
               </Link>
-              <Link href="/sign-up" className={buttonVariants({ variant: "default" })}>
+              <Link href="/sign-up" className={buttonVariants({ variant: "default", size: "sm" }) + " md:px-4 md:py-2"}>
                 Pulsuz başla
               </Link>
             </>
